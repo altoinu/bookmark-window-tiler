@@ -1,29 +1,9 @@
+import { WorkspaceProfile } from '../types/index.js';
 import { generateUrlConfigHtml } from './templates.js';
 
 // Extend the native bookmark type to include our custom depth property
 export interface FolderNode extends browser.bookmarks.BookmarkTreeNode {
   depth: number;
-}
-
-export interface WindowLayout {
-  enabled: boolean;
-  height: number;
-  width: number;
-  x: number;
-  y: number;
-}
-
-export interface WorkspaceProfile {
-  bookmarkFolderId: string;
-  id: string;
-  name: string;
-  urlConfigs: {
-    [url: string]: WindowLayout;
-  };
-  workspaceBounds?: {
-    height: number;
-    width: number;
-  };
 }
 
 // Global cached states for runtime operation
@@ -228,18 +208,27 @@ const saveProfile = async (): Promise<void> => {
     const index = hiddenInput.id.split('-')[1];
 
     const enabledEl = document.getElementById(`enabled-${index}`) as HTMLInputElement;
-    const wEl = document.getElementById(`w-${index}`) as HTMLInputElement;
     const hEl = document.getElementById(`h-${index}`) as HTMLInputElement;
+    const hUnitEl = document.getElementById(`h-unit-${index}`) as HTMLSelectElement;
+    const wEl = document.getElementById(`w-${index}`) as HTMLInputElement;
+    const wUnitEl = document.getElementById(`w-unit-${index}`) as HTMLSelectElement;
     const xEl = document.getElementById(`x-${index}`) as HTMLInputElement;
+    const xUnitEl = document.getElementById(`x-unit-${index}`) as HTMLSelectElement;
     const yEl = document.getElementById(`y-${index}`) as HTMLInputElement;
+    const yUnitEl = document.getElementById(`y-unit-${index}`) as HTMLSelectElement;
 
-    if (url && enabledEl && wEl && hEl && xEl && yEl) {
+    if (url && enabledEl && hEl && hUnitEl && wEl && wUnitEl && xEl && xUnitEl && yEl && yUnitEl) {
+      const hVal = parseInt(hEl.value, 10) || 600;
+      const wVal = parseInt(wEl.value, 10) || 800;
+      const xVal = parseInt(xEl.value, 10) || 0;
+      const yVal = parseInt(yEl.value, 10) || 0;
+
       profile.urlConfigs[url] = {
         enabled: enabledEl.checked,
-        height: parseInt(hEl.value, 10) || 600,
-        width: parseInt(wEl.value, 10) || 800,
-        x: parseInt(xEl.value, 10) || 0,
-        y: parseInt(yEl.value, 10) || 0,
+        height: hUnitEl.value === '%' ? `${hVal}%` : hVal,
+        width: wUnitEl.value === '%' ? `${wVal}%` : wVal,
+        x: xUnitEl.value === '%' ? `${xVal}%` : xVal,
+        y: yUnitEl.value === '%' ? `${yVal}%` : yVal,
       };
     }
   });

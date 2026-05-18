@@ -1,24 +1,15 @@
-// Duplicating interfaces here for simplicity without setting up a shared module folder yet
-export interface WindowLayout {
-  enabled: boolean;
-  height: number;
-  width: number;
-  x: number;
-  y: number;
-}
+import { WorkspaceProfile } from '../types/index.js';
 
-export interface WorkspaceProfile {
-  bookmarkFolderId: string;
-  id: string;
-  name: string;
-  urlConfigs: {
-    [url: string]: WindowLayout;
-  };
-  workspaceBounds?: {
-    height: number;
-    width: number;
-  };
-}
+const resolveDimension = (value: string | number, maxAvailable: number): number => {
+  if (typeof value === 'number') {
+    return value;
+  }
+  if (typeof value === 'string' && value.endsWith('%')) {
+    const percentage = parseFloat(value) / 100;
+    return Math.round(maxAvailable * percentage);
+  }
+  return parseInt(value, 10) || 0;
+};
 
 const launchProfile = async (profile: WorkspaceProfile): Promise<void> => {
   const urls = Object.keys(profile.urlConfigs);
@@ -38,6 +29,12 @@ const launchProfile = async (profile: WorkspaceProfile): Promise<void> => {
     // Only launch if the user left the checkbox enabled
     if (layout && layout.enabled) {
       try {
+        // Resolve dynamic percentage options or absolute pixel integers against current screen layout
+        const calculatedHeight = resolveDimension(layout.height, window.screen.availHeight);
+        const calculatedWidth = resolveDimension(layout.width, window.screen.availWidth);
+        const calculatedX = resolveDimension(layout.x, window.screen.availWidth);
+        const calculatedY = resolveDimension(layout.y, window.screen.availHeight);
+
         // Look for a cleaned-up match in our open tabs
         const existingTab = allTabs.find((tab) => tab.url && cleanUrl(tab.url) === cleanUrl(url));
 
@@ -49,11 +46,11 @@ const launchProfile = async (profile: WorkspaceProfile): Promise<void> => {
             console.log(`Extracting shared tab ${url} into its own layout window.`);
             // Extract the existing tab into a new window with the precise layout
             await browser.windows.create({
-              height: layout.height,
-              left: layout.x,
+              height: calculatedHeight,
+              left: calculatedX,
               tabId: existingTab.id,
-              top: layout.y,
-              width: layout.width,
+              top: calculatedY,
+              width: calculatedWidth,
             });
           } else {
             console.log(`Tab already open and standalone for ${url}, snapping to layout.`);
@@ -63,20 +60,20 @@ const launchProfile = async (profile: WorkspaceProfile): Promise<void> => {
             // 2. Bring the window to the front and apply the configured dimensions
             await browser.windows.update(existingTab.windowId, {
               focused: true,
-              height: layout.height,
-              left: layout.x,
-              top: layout.y,
-              width: layout.width,
+              height: calculatedHeight,
+              left: calculatedX,
+              top: calculatedY,
+              width: calculatedWidth,
             });
           }
         } else {
           // Tab doesn't exist, spawn a fresh window
           await browser.windows.create({
-            height: layout.height,
-            left: layout.x,
-            top: layout.y,
+            height: calculatedHeight,
+            left: calculatedX,
+            top: calculatedY,
             url: url,
-            width: layout.width,
+            width: calculatedWidth,
           });
         }
       } catch (error) {
