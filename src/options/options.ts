@@ -11,6 +11,36 @@ let allFolders: FolderNode[] = [];
 let currentFolderId: string = '';
 let currentProfileId: string = 'new';
 let currentProfilesList: WorkspaceProfile[] = [];
+let isUpdatingDropdown: boolean = false;
+
+const deleteProfile = async (): Promise<void> => {
+  if (currentProfileId === 'new' || !currentProfileId) return;
+
+  const activeProfile = currentProfilesList.find((p) => p.id === currentProfileId);
+  const profileName = activeProfile ? activeProfile.name : 'this profile';
+
+  if (!confirm(`Are you sure you want to delete the profile "${profileName}"?`)) {
+    return;
+  }
+
+  try {
+    // Evict target profile layout key from local storage pipeline
+    const storageKey = `workspace_${currentProfileId}`;
+    await browser.storage.local.remove(storageKey);
+
+    // Revert structural configuration state back to new blueprint mode
+    currentProfileId = 'new';
+
+    // Synchronize selector views and clean remaining grid layouts
+    await syncProfilesDropdown();
+    await renderLayoutGrid();
+
+    console.log(`Successfully evicted storage profile: ${storageKey}`);
+  } catch (error) {
+    console.error('Error executing profile deletion sequence:', error);
+    alert('Failed to delete the profile configuration.');
+  }
+};
 
 // Recursively parse the bookmark tree to extract only folders and track depth
 const extractFolders = (nodes: browser.bookmarks.BookmarkTreeNode[], depth: number = 0): FolderNode[] => {
@@ -64,10 +94,11 @@ const renderDropdown = (sortMode: 'alphabetical' | 'original'): void => {
 // Builds the grid inputs matching either saved configurations or fallback defaults
 const renderLayoutGrid = async (): Promise<void> => {
   const container = document.getElementById('url-config-container');
-  const saveBtn = document.getElementById('save-btn');
+  const deleteBtn = document.getElementById('delete-btn') as HTMLButtonElement;
   const profileNameInput = document.getElementById('profile-name') as HTMLInputElement;
+  const saveBtn = document.getElementById('save-btn');
 
-  if (!container || !saveBtn || !profileNameInput) return;
+  if (!container || !deleteBtn || !profileNameInput || !saveBtn) return;
 
   try {
     const children = await browser.bookmarks.getChildren(currentFolderId);
@@ -75,6 +106,7 @@ const renderLayoutGrid = async (): Promise<void> => {
 
     if (links.length === 0) {
       container.innerHTML = '<p>No URLs found in this folder.</p>';
+      deleteBtn.style.display = 'none';
       saveBtn.style.display = 'none';
       return;
     }
@@ -84,10 +116,12 @@ const renderLayoutGrid = async (): Promise<void> => {
 
     if (activeProfile) {
       profileNameInput.value = activeProfile.name;
+      deleteBtn.style.display = 'inline-block';
     } else {
       // Default name to folder title if initializing a new profile configuration
       const folderData = allFolders.find((f) => f.id === currentFolderId);
       profileNameInput.value = folderData?.title ? `${folderData.title} Layout` : '';
+      deleteBtn.style.display = 'none';
     }
 
     let html = '<h3 style="margin-top: 0;">Configure Layouts</h3>';
@@ -119,11 +153,15 @@ const syncProfilesDropdown = async (): Promise<void> => {
 
   if (!profileMgmtContainer || !profileSelectEl) return;
 
+  // Activate lock flag to ignore browser-driven event dispatches during DOM reconstruction
+  isUpdatingDropdown = true;
+
   // Clear existing choices but preserve the primary generator option
   profileSelectEl.innerHTML = '<option value="new">-- Create New Profile --</option>';
 
   if (!currentFolderId) {
     profileMgmtContainer.style.display = 'none';
+    isUpdatingDropdown = false;
     return;
   }
 
@@ -146,20 +184,26 @@ const syncProfilesDropdown = async (): Promise<void> => {
   });
 
   profileMgmtContainer.style.display = 'block';
+
+  // Release the event handler lock once layout rendering settles
+  isUpdatingDropdown = false;
 };
 
 const handleFolderSelection = async (event: Event): Promise<void> => {
+  if (isUpdatingDropdown || !event.isTrusted) return; // Guard against programmatic option resets during re-renders
   const selectEl = event.target as HTMLSelectElement;
   currentFolderId = selectEl.value;
   currentProfileId = 'new'; // Reset to default when swapping workspace targets
 
   const container = document.getElementById('url-config-container');
+  const deleteBtn = document.getElementById('delete-btn') as HTMLButtonElement;
   const saveBtn = document.getElementById('save-btn');
 
-  if (!container || !saveBtn) return;
+  if (!container || !deleteBtn || !saveBtn) return;
 
   if (!currentFolderId) {
     container.innerHTML = '';
+    deleteBtn.style.display = 'none';
     saveBtn.style.display = 'none';
     await syncProfilesDropdown();
     return;
@@ -170,6 +214,7 @@ const handleFolderSelection = async (event: Event): Promise<void> => {
 };
 
 const handleProfileSelection = async (event: Event): Promise<void> => {
+  if (isUpdatingDropdown || !event.isTrusted) return; // Guard against programmatic option resets during re-renders
   const selectEl = event.target as HTMLSelectElement;
   currentProfileId = selectEl.value;
   await renderLayoutGrid();
@@ -191,8 +236,11 @@ const saveProfile = async (): Promise<void> => {
     return;
   }
 
-  // Preserve operational ID if overwriting an existing config, or establish a unique timestamp hash
-  const finalProfileId = currentProfileId === 'new' ? `profile_${Date.now()}` : currentProfileId;
+  // Check if a profile with the same name already exists for this folder to safely override it
+  const matchingProfileByName = currentProfilesList.find((p) => p.name.toLowerCase() === chosenName.toLowerCase());
+
+  // Preserve operational ID if overwriting an existing config, catch matching profile names, or establish a unique timestamp hash
+  const finalProfileId = currentProfileId !== 'new' ? currentProfileId : matchingProfileByName ? matchingProfileByName.id : `profile_${Date.now()}`;
 
   const profile: WorkspaceProfile = {
     bookmarkFolderId: currentFolderId,
@@ -270,19 +318,24 @@ const initializeOptions = async (): Promise<void> => {
     allFolders = extractFolders(tree);
     renderDropdown('original');
 
-    const selectEl = document.getElementById('folder-select') as HTMLSelectElement;
-    selectEl.addEventListener('change', handleFolderSelection);
+    const deleteBtn = document.getElementById('delete-btn');
+    if (deleteBtn) {
+      deleteBtn.addEventListener('click', deleteProfile);
+    }
 
     const profileSelectEl = document.getElementById('profile-select') as HTMLSelectElement;
     profileSelectEl.addEventListener('change', handleProfileSelection);
-
-    const sortRadios = document.querySelectorAll('input[name="sort-order"]');
-    sortRadios.forEach((radio) => radio.addEventListener('change', handleSortChange));
 
     const saveBtn = document.getElementById('save-btn');
     if (saveBtn) {
       saveBtn.addEventListener('click', saveProfile);
     }
+
+    const selectEl = document.getElementById('folder-select') as HTMLSelectElement;
+    selectEl.addEventListener('change', handleFolderSelection);
+
+    const sortRadios = document.querySelectorAll('input[name="sort-order"]');
+    sortRadios.forEach((radio) => radio.addEventListener('change', handleSortChange));
   } catch (error) {
     console.error('Failed to load bookmarks configuration:', error);
   }

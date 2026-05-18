@@ -57,11 +57,11 @@ const launchProfile = async (profile: WorkspaceProfile): Promise<void> => {
             // 1. Activate the tab within its window
             await browser.tabs.update(existingTab.id, { active: true });
 
-            // 2. Bring the window to the front and apply the configured dimensions
+            // 2. Apply the configured dimensions to the window without stealing popup focus
             await browser.windows.update(existingTab.windowId, {
-              focused: true,
               height: calculatedHeight,
               left: calculatedX,
+              state: 'normal',
               top: calculatedY,
               width: calculatedWidth,
             });
