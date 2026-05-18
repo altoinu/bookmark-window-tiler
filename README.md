@@ -74,6 +74,7 @@ The workspace is fully optimized for integrated breakpoint debugging and live co
 ### Manual Extension Inspection
 
 If you prefer testing functionality outside of the automated VS Code launcher environment:
+
 1. Compile the workspace manually by executing `npm run build`.
 2. Follow steps 4–6 in the standard **Installation** guide above to mount the temporary asset inside `about:debugging`.
 3. Click the **Inspect** button adjacent to the extension descriptor within `about:debugging` to reveal the standalone Firefox Add-on Toolbox window to trace local storage entries and debug script executions.

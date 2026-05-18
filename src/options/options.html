@@ -8,11 +8,11 @@
     <link rel="stylesheet" href="options.css" />
   </head>
   <body>
-    <div class="header" style="display: flex; align-items: center; gap: 15px;">
-      <img src="../icons/icon.svg" alt="Logo" style="width: 48px; height: 48px;" />
+    <div class="header" style="display: flex; align-items: center; gap: 15px">
+      <img src="../icons/icon.svg" alt="Logo" style="width: 48px; height: 48px" />
       <div>
-        <h1 style="margin: 0;">Workspace Configurations</h1>
-        <p style="margin: 5px 0 0 0;">Select a bookmark folder to configure window layouts.</p>
+        <h1 style="margin: 0">Workspace Configurations</h1>
+        <p style="margin: 5px 0 0 0">Select a bookmark folder to configure window layouts.</p>
       </div>
     </div>
 
@@ -24,7 +24,8 @@
       </div>
 
       <div class="form-group">
-        <label for="folder-select"><strong>Workspace Folder:</strong></label><br />
+        <label for="folder-select"><strong>Workspace Folder:</strong></label
+        ><br />
         <select id="folder-select">
           <option value="">-- Select a Bookmark Folder --</option>
         </select>
@@ -32,20 +33,27 @@
 
       <div id="profile-mgmt-container" style="display: none">
         <div class="form-group">
-          <label for="profile-select"><strong>Configuration Profile:</strong></label><br />
+          <label for="profile-select"><strong>Configuration Profile:</strong></label
+          ><br />
           <select id="profile-select">
             <option value="new">-- Create New Profile --</option>
           </select>
         </div>
         <div class="form-group">
-          <label for="profile-name"><strong>Profile Name:</strong></label><br />
+          <label for="profile-name"><strong>Profile Name:</strong></label
+          ><br />
           <input type="text" id="profile-name" class="profile-input" placeholder="e.g., Morning Trading Layout" />
         </div>
       </div>
 
       <div id="url-config-container"></div>
 
-      <button id="delete-btn" style="display: none; padding: 10px 20px; font-size: 16px; cursor: pointer; background-color: #f44336; color: white; border: none; margin-left: 10px;">Delete Profile</button>
+      <button
+        id="delete-btn"
+        style="display: none; padding: 10px 20px; font-size: 16px; cursor: pointer; background-color: #f44336; color: white; border: none; margin-left: 10px"
+      >
+        Delete Profile
+      </button>
       <button id="save-btn" style="display: none; padding: 10px 20px; font-size: 16px; cursor: pointer">Save Profile</button>
     </div>
 
