@@ -1,15 +1,21 @@
 {
-  "manifest_version": 3,
-  "name": "Bookmark Window Tiler",
-  "version": "1.0",
-  "description": "Opens specific bookmark folders into custom, pixel-perfect window layouts.",
-  "permissions": ["bookmarks", "storage", "tabs", "windows"],
-  "options_ui": {
-    "page": "options/options.html",
-    "open_in_tab": true
-  },
   "action": {
+    "default_icon": "icons/icon.svg",
     "default_popup": "popup/popup.html",
     "default_title": "Launch Workspaces"
-  }
+  },
+  "description": "Opens specific bookmark folders into custom, pixel-perfect window layouts.",
+  "icons": {
+    "128": "icons/icon.svg",
+    "16": "icons/icon.svg",
+    "48": "icons/icon.svg"
+  },
+  "manifest_version": 3,
+  "name": "Bookmark Window Tiler",
+  "options_ui": {
+    "open_in_tab": true,
+    "page": "options/options.html"
+  },
+  "permissions": ["bookmarks", "storage", "tabs", "windows"],
+  "version": "1.0"
 }

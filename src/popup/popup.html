@@ -20,10 +20,17 @@
         width: 250px;
       }
       h2 {
+        align-items: center;
         border-bottom: 1px solid #ccc;
+        display: flex;
         font-size: 16px;
+        gap: 8px;
         margin: 0 0 15px 0;
         padding-bottom: 8px;
+      }
+      h2 img {
+        height: 16px;
+        width: 16px;
       }
       .empty-state {
         color: #666;
@@ -50,7 +57,10 @@
     </style>
   </head>
   <body>
-    <h2>Launch Workspace</h2>
+    <h2>
+      <img src="../icons/icon.svg" alt="" />
+      Launch Workspace
+    </h2>
     <div id="profiles-container">
       <div class="empty-state">Loading...</div>
     </div>

@@ -19,7 +19,7 @@
     "clean": "run-p clean:coverage clean:modules",
     "clean:coverage": "rm -rf coverage",
     "clean:modules": "rm -rf node_modules",
-    "copy-static": "mkdir -p dist && cp src/manifest.json dist/ && cp -R src/options dist/ 2>/dev/null || true && cp -R src/popup dist/ 2>/dev/null || true",
+    "copy-static": "mkdir -p dist && cp src/manifest.json dist/ && cp -R src/icons dist/ 2>/dev/null || true && cp -R src/options dist/ 2>/dev/null || true && cp -R src/popup dist/ 2>/dev/null || true",
     "format": "(git diff --name-only HEAD; git ls-files --others --exclude-standard) | grep -E '\\.(md|css|js|cjs|mjs|jsx|ts|cts|mts|tsx)$' | xargs prettier --write",
     "format:all": "prettier --write .",
     "lint": "eslint .",
