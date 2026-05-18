@@ -1,0 +1,24 @@
+{
+  "configurations": [
+    {
+      "addonPath": "${workspaceFolder}/dist",
+      "addonType": "webExtension",
+      "firefoxExecutable": "/Applications/Firefox.app/Contents/MacOS/firefox",
+      "name": "Launch Extension Workspace",
+      "pathMappings": [
+        {
+          "path": "${workspaceFolder}/src",
+          "url": "moz-extension://src"
+        },
+        {
+          "path": "${workspaceFolder}/dist",
+          "url": "moz-extension://*"
+        }
+      ],
+      "popupAutohideButton": true,
+      "request": "launch",
+      "type": "firefox"
+    }
+  ],
+  "version": "0.2.0"
+}

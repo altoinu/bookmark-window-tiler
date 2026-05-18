@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bookmark Window Tiler - Settings</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <div class="header">
+      <h1>Workspace Configurations</h1>
+      <p>Select a bookmark folder to configure window layouts.</p>
+    </div>
+
+    <div id="app-container">
+      <div class="sort-group">
+        <label><strong>Sort Folders By:</strong></label>
+        <label class="radio-label"> <input type="radio" name="sort-order" value="original" checked /> Original Order </label>
+        <label class="radio-label"> <input type="radio" name="sort-order" value="alphabetical" /> Alphabetical </label>
+      </div>
+
+      <div class="form-group">
+        <label for="folder-select"><strong>Workspace Folder:</strong></label
+        ><br />
+        <select id="folder-select">
+          <option value="">-- Select a Bookmark Folder --</option>
+        </select>
+      </div>
+
+      <div id="profile-mgmt-container" style="display: none">
+        <div class="form-group">
+          <label for="profile-select"><strong>Configuration Profile:</strong></label
+          ><br />
+          <select id="profile-select">
+            <option value="new">-- Create New Profile --</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="profile-name"><strong>Profile Name:</strong></label
+          ><br />
+          <input type="text" id="profile-name" class="profile-input" placeholder="e.g., Morning Trading Layout" />
+        </div>
+      </div>
+
+      <div id="url-config-container"></div>
+
+      <button id="save-btn" style="display: none; padding: 10px 20px; font-size: 16px; cursor: pointer">Save Profile</button>
+    </div>
+
+    <script type="module" src="options.js"></script>
+  </body>
+</html>

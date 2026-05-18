@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "Bookmark Window Tiler",
+  "version": "1.0",
+  "description": "Opens specific bookmark folders into custom, pixel-perfect window layouts.",
+  "permissions": ["bookmarks", "storage", "tabs", "windows"],
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": true
+  },
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "Launch Workspaces"
+  }
+}

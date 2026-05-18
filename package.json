@@ -1,0 +1,50 @@
+{
+  "name": "bookmark-window-tiler",
+  "version": "0.0.1",
+  "description": "Firefox extension to tile and snap bookmark folders into custom, multi-profile pixel-perfect window layouts.",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/altoinu/bookmark-window-tiler.git"
+  },
+  "author": "Kaoru Kawashima",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/altoinu/bookmark-window-tiler/issues"
+  },
+  "homepage": "https://github.com/altoinu/bookmark-window-tiler#readme",
+  "keywords": [],
+  "scripts": {
+    "build": "tsc && npm run copy-static",
+    "clean": "run-p clean:coverage clean:modules",
+    "clean:coverage": "rm -rf coverage",
+    "clean:modules": "rm -rf node_modules",
+    "copy-static": "mkdir -p dist && cp src/manifest.json dist/ && cp -R src/options dist/ 2>/dev/null || true && cp -R src/popup dist/ 2>/dev/null || true",
+    "format": "(git diff --name-only HEAD; git ls-files --others --exclude-standard) | grep -E '\\.(md|css|js|cjs|mjs|jsx|ts|cts|mts|tsx)$' | xargs prettier --write",
+    "format:all": "prettier --write .",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "prepare": "husky",
+    "reinstall": "run-s clean reinstall:install",
+    "reinstall:install": "npm install",
+    "watch": "tsc -w"
+  },
+  "devDependencies": {
+    "@eslint/css": "^1.2.0",
+    "@eslint/js": "^10.0.1",
+    "@eslint/json": "^1.2.0",
+    "@eslint/markdown": "^8.0.1",
+    "@types/firefox-webext-browser": "^143.0.0",
+    "eslint": "^10.4.0",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.6.0",
+    "husky": "^9.1.7",
+    "jiti": "^2.7.0",
+    "lint-staged": "^17.0.5",
+    "npm-run-all": "^4.1.5",
+    "prettier": "3.8.3",
+    "prettier-plugin-sort-imports": "^1.8.11",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.59.3"
+  }
+}
