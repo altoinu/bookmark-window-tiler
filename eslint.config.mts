@@ -34,7 +34,7 @@ const eslintConfig = defineConfig([
   ...tseslint.configs.recommended,
   // --- Block for ROOT level config files (Syntax only, no strict type-checking) ---
   {
-    files: ['*.{ts,cts,mts}'], // Only targets TS files sitting in the root folder
+    files: ['*.{js,cjs,mjs,ts,cts,mts}'], // Only targets TS files sitting in the root folder
     languageOptions: {
       parser: tseslint.parser,
       parserOptions: {
@@ -49,7 +49,6 @@ const eslintConfig = defineConfig([
   // --- Block for SRC level application files (Strict type-checking) ---
   {
     // for ts files
-    // for other non test files
     // files: ["**/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}"],
     // files: ["**/*.?(c|m)[jt]s?(x)"],
     files: ['src/**/*.{ts,cts,mts,tsx}'],
@@ -74,7 +73,6 @@ const eslintConfig = defineConfig([
   },
   {
     // for js files
-    // for other non test files
     // files: ["**/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}"],
     // files: ["**/*.?(c|m)[jt]s?(x)"],
     files: ['**/*.{js,cjs,mjs,jsx}'],
