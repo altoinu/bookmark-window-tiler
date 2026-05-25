@@ -19,6 +19,11 @@
 - [ ] **Silent Error Mitigation:** Gracefully intercept execution blockers like system-protected frames (`about:*`, `view-source:*`) or dead URLs during the tab-extraction process.
 - [ ] **Workspace State Overwrite:** Add an alternative execution mode to completely close all unrelated open windows/tabs when a targeted profile initializes.
 
+## 📦 Deployment & Lifecycle Management (New Section)
+
+- [ ] **Firefox Add-ons Publishing:** Complete the developer verification, review, and signing process for listing the extension on the official Mozilla Add-ons (AMO) store.
+- [ ] **Permanent Installation Methodology:** Research and implement standard distribution/side-loading techniques beyond `about:debugging` temporary loads for consistent local performance.
+
 ## 🎨 UI/UX Polish & Tooling
 
 - [ ] **Dark Mode Syncing:** Apply a declarative CSS variable scheme that automatically respects the host operating system's light/dark profile theme.
@@ -26,3 +31,10 @@
 - [x] **Multi-Language Prettier Pipeline:** Expanded the developer workflow formatting matrix within `package.json` to natively intercept, clean, and standardize `.html` and `.css` files alongside core source files.
 - [ ] **Real-Time Active Tracking:** Highlight the currently active profile button in the popup viewport if all current browser windows match saved coordinates perfectly.
 - [x] **Vector Asset Branding:** Integrated a high-fidelity, scalable SVG workspace icon natively across the extension manifest background context, option window headers, and toolbar dropdown popovers.
+- [ ] **Workbench Layout Refinement:** Fix and stabilize the CSS grid/flexbox UI layout within the `templates.ts` generator to ensure consistent alignment across all resolution types.
+
+## 🛠️ Validation, Architecture & Templates
+
+- [ ] **GitHub Repository Template Creation:** Turn this customized ground-up WebExtension configuration into a reusable repository template on GitHub for bootstrapping future modular extensions.
+- [ ] **Jest Testing Framework Support:** Integrate Jest along with the necessary TypeScript/ESM configurations to unit test our state management, layout utilities, and coordinate calculation algorithms step-by-step.
+- [ ] **React Framework Feasibility Study:** Investigate architectural patterns, build requirements (such as bundler configurations like Vite/Webpack), and UI sync strategies for utilizing React to build complex extension option panels and popups.
