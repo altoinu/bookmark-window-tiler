@@ -12,10 +12,20 @@ const parseLayoutValue = (val: string | number | undefined, defaultVal: number) 
   return { unit, value: isNaN(parsedNum) ? defaultVal : parsedNum };
 };
 
+const renderField = (prefix: string, index: number, val: number, unit: string, label: string) => `
+  <div class="field-grid">
+    <span class="field-name">${label}:</span>
+    <input type="number" class="number-input" id="${prefix}-${index}" value="${val}">
+    <select id="${prefix}-unit-${index}" class="unit-select">
+      <option value="px" ${unit === 'px' ? 'selected' : ''}>px</option>
+      <option value="%" ${unit === '%' ? 'selected' : ''}>%</option>
+    </select>
+  </div>
+`;
+
 export const generateUrlConfigHtml = (title: string, url: string, index: number, layout?: WindowLayout): string => {
   // Use saved config values if they exist, otherwise fall back to defaults
   const enabled = layout ? layout.enabled : true;
-
   const hParsed = parseLayoutValue(layout?.height, 600);
   const wParsed = parseLayoutValue(layout?.width, 800);
   const xParsed = parseLayoutValue(layout?.x, 0);
@@ -23,46 +33,15 @@ export const generateUrlConfigHtml = (title: string, url: string, index: number,
 
   return `
     <div class="url-card">
-      <div class="url-title">${title}</div>
-      <div class="input-row">
-        <label class="input-label">
-          <input type="checkbox" id="enabled-${index}" ${enabled ? 'checked' : ''}>
-          Enabled
-        </label>
-        <label class="input-label">
-          Width: 
-          <input type="number" class="number-input" id="w-${index}" value="${wParsed.value}" style="width: 60px;">
-          <select id="w-unit-${index}">
-            <option value="px" ${wParsed.unit === 'px' ? 'selected' : ''}>px</option>
-            <option value="%" ${wParsed.unit === '%' ? 'selected' : ''}>%</option>
-          </select>
-        </label>
-        <label class="input-label">
-          Height: 
-          <input type="number" class="number-input" id="h-${index}" value="${hParsed.value}" style="width: 60px;">
-          <select id="h-unit-${index}">
-            <option value="px" ${hParsed.unit === 'px' ? 'selected' : ''}>px</option>
-            <option value="%" ${hParsed.unit === '%' ? 'selected' : ''}>%</option>
-          </select>
-        </label>
-        <label class="input-label">
-          X: 
-          <input type="number" class="number-input" id="x-${index}" value="${xParsed.value}" style="width: 60px;">
-          <select id="x-unit-${index}">
-            <option value="px" ${xParsed.unit === 'px' ? 'selected' : ''}>px</option>
-            <option value="%" ${xParsed.unit === '%' ? 'selected' : ''}>%</option>
-          </select>
-        </label>
-        <label class="input-label">
-          Y: 
-          <input type="number" class="number-input" id="y-${index}" value="${yParsed.value}" style="width: 60px;">
-          <select id="y-unit-${index}">
-            <option value="px" ${yParsed.unit === 'px' ? 'selected' : ''}>px</option>
-            <option value="%" ${yParsed.unit === '%' ? 'selected' : ''}>%</option>
-          </select>
-        </label>
-        <input type="hidden" id="url-${index}" value="${url}">
+      <input type="checkbox" class="url-checkbox" id="enabled-${index}" ${enabled ? 'checked' : ''}>
+      <label class="url-title" for="enabled-${index}">${title}</label>
+      <div class="fields-container">
+        ${renderField('x', index, xParsed.value, xParsed.unit, 'X')}
+        ${renderField('y', index, yParsed.value, yParsed.unit, 'Y')}
+        ${renderField('w', index, wParsed.value, wParsed.unit, 'W')}
+        ${renderField('h', index, hParsed.value, hParsed.unit, 'H')}
       </div>
+      <input type="hidden" id="url-${index}" value="${url}">
     </div>
   `;
 };

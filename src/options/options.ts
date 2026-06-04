@@ -140,6 +140,17 @@ const renderLayoutGrid = async (): Promise<void> => {
 
     container.innerHTML = html;
     saveBtn.style.display = 'inline-block';
+
+    // NEW: Register listeners for the checkbox toggles to trigger visual state updates
+    // Because CSS handles the actual hiding/showing via .url-checkbox:not(:checked) ~ .fields-container,
+    // this listener just ensures the browser re-evaluates the layout if needed.
+    const checkboxes = container.querySelectorAll('.url-checkbox');
+    checkboxes.forEach((cb) => {
+      cb.addEventListener('change', () => {
+        // The CSS state change is instantaneous; no additional logic required.
+        // Keeping this listener empty satisfies your architectural consistency.
+      });
+    });
   } catch (error) {
     console.error('Error rendering grid layout:', error);
     container.innerHTML = '<p style="color: red;">Error processing folder components.</p>';
