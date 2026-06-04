@@ -16,6 +16,10 @@
         }
       ],
       "popupAutohideButton": true,
+      "preLaunchTask": "npm: build",
+      "preferences": {
+        "devtools.selfxss.count": 100
+      },
       "request": "launch",
       "type": "firefox"
     }
