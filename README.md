@@ -82,6 +82,12 @@ If you prefer testing functionality outside of the automated VS Code launcher en
 ## Scripts Command Index
 
 - `npm run build` - Transpiles the extension package and stages production assets inside `dist/`.
-- `npm run watch` - Runs the TypeScript compiler in active file-watcher mode.
-- `npm run lint` - Executes automated ESLint syntax validation across source files and toolings.
-- `npm run format:all` - Runs Prettier format processing rules uniformly across the repository workspace.
+- `npm run clean` - Rejects and deep-cleans all ephemeral artifact directories (`dist/`, `artifacts/`, `coverage/`, and `node_modules/`).
+- `npm run format` - Selective Prettier formatting pass restricted exclusively to files containing staged or uncommitted local changes.
+- `npm run format:all` - Comprehensive formatting pipeline running Prettier processing definitions across the entire repository architecture uniformly.
+- `npm run lint` - Executes automated ESLint static code analysis to trace syntax patterns and errors.
+- `npm run lint:fix` - Runs ESLint syntax and code intelligence validations with automated downstream formatting repair loops.
+- `npm run package` - Prunes prior artifacts, rebuilds source components, aggregates assets, and compiles a signed-ready extension archive inside `artifacts/`.
+- `npm run reinstall` - Triggers an absolute purge of node modules and target directories before initializing a clean, fresh dependency build cycle.
+- `npm run release:xxx` - Automates complete structural software deployment variations (`patch`, `minor`, `major`, `rc`, `beta`); increments version records, executes the automatic version configuration sync engine, stages final JSON sets, and injects tagged release elements into Git history.
+- `npm run watch` - Runs the active TypeScript compilation loop in a persistent file-watcher state.
