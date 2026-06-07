@@ -6,6 +6,11 @@
   },
   "browser_specific_settings": {
     "gecko": {
+      "data_collection_permissions": {
+        "required": [
+          "none"
+        ]
+      },
       "id": "bookmark-window-tiler@altovel.com",
       "update_url": "https://raw.githubusercontent.com/altoinu/bookmark-window-tiler/main/updates.json"
     }
@@ -25,8 +30,7 @@
   "permissions": [
     "bookmarks",
     "storage",
-    "tabs",
-    "windows"
+    "tabs"
   ],
   "version": "0.0.1"
 }
