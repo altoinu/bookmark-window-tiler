@@ -1,6 +1,6 @@
 {
   "name": "bookmark-window-tiler",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Firefox extension to tile and snap bookmark folders into custom, multi-profile pixel-perfect window layouts.",
   "type": "module",
   "repository": {
