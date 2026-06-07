@@ -1,5 +1,6 @@
 import { WorkspaceProfile } from '../types/index.js';
 import { generateUrlConfigHtml } from './templates.js';
+import 'webextension-polyfill';
 
 // Extend the native bookmark type to include our custom depth property
 export interface FolderNode extends browser.bookmarks.BookmarkTreeNode {

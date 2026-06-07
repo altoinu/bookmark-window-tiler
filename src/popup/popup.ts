@@ -1,4 +1,5 @@
 import { WorkspaceProfile } from '../types/index.js';
+import 'webextension-polyfill';
 
 const resolveDimension = (value: string | number, maxAvailable: number): number => {
   if (typeof value === 'number') {
