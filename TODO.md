@@ -22,7 +22,7 @@
 ## 📦 Deployment & Lifecycle Management (New Section)
 
 - [ ] **Firefox Add-ons Publishing:** Complete the developer verification, review, and signing process for listing the extension on the official Mozilla Add-ons (AMO) store.
-- [ ] **Permanent Installation Methodology:** Research and implement standard distribution/side-loading techniques beyond `about:debugging` temporary loads for consistent local performance.
+- [x] **Permanent Installation Methodology:** Researched and implemented an "On your own" Unlisted distribution model, complete with automated `.zip` packaging and a self-hosted `updates.json` GitHub ledger for seamless local upgrades.
 
 ## 🎨 UI/UX Polish & Tooling
 
@@ -35,6 +35,6 @@
 
 ## 🛠️ Validation, Architecture & Templates
 
-- [ ] **GitHub Repository Template Creation:** Turn this customized ground-up WebExtension configuration into a reusable repository template on GitHub for bootstrapping future modular extensions.
+- [x] **GitHub Repository Template Creation:** Turned this customized ground-up WebExtension configuration into a reusable, cross-browser repository blueprint (`webextension-template`) on GitHub, integrated with `webextension-polyfill` for bootstrapping future extensions.
 - [ ] **Jest Testing Framework Support:** Integrate Jest along with the necessary TypeScript/ESM configurations to unit test our state management, layout utilities, and coordinate calculation algorithms step-by-step.
 - [ ] **React Framework Feasibility Study:** Investigate architectural patterns, build requirements (such as bundler configurations like Vite/Webpack), and UI sync strategies for utilizing React to build complex extension option panels and popups.
