@@ -17,9 +17,9 @@
   },
   "description": "Opens specific bookmark folders into custom, pixel-perfect window layouts.",
   "icons": {
-    "128": "icons/icon.svg",
     "16": "icons/icon.svg",
-    "48": "icons/icon.svg"
+    "48": "icons/icon.svg",
+    "128": "icons/icon.svg"
   },
   "manifest_version": 3,
   "name": "Bookmark Window Tiler",
@@ -32,5 +32,5 @@
     "storage",
     "tabs"
   ],
-  "version": "0.0.1"
+  "version": "0.0.3"
 }
