@@ -54,6 +54,7 @@
     "@eslint/json": "^1.2.0",
     "@eslint/markdown": "^8.0.1",
     "@types/firefox-webext-browser": "^143.0.0",
+    "@types/webextension-polyfill": "^0.12.5",
     "eslint": "^10.4.0",
     "eslint-config-prettier": "^10.1.8",
     "globals": "^17.6.0",
@@ -66,5 +67,8 @@
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.59.3",
     "web-ext": "^10.3.0"
+  },
+  "dependencies": {
+    "webextension-polyfill": "^0.12.0"
   }
 }
