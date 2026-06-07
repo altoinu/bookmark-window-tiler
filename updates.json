@@ -1,0 +1,12 @@
+{
+  "addons": {
+    "bookmark-window-tiler@altovel.com": {
+      "updates": [
+        {
+          "update_link": "https://github.com/altoinu/bookmark-window-tiler/releases/download/v0.0.1/bookmark-window-tiler-0.0.1.xpi",
+          "version": "0.0.1"
+        }
+      ]
+    }
+  }
+}

@@ -4,6 +4,12 @@
     "default_popup": "popup/popup.html",
     "default_title": "Launch Workspaces"
   },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "bookmark-window-tiler@altovel.com",
+      "update_url": "https://raw.githubusercontent.com/altoinu/bookmark-window-tiler/main/updates.json"
+    }
+  },
   "description": "Opens specific bookmark folders into custom, pixel-perfect window layouts.",
   "icons": {
     "128": "icons/icon.svg",
@@ -16,6 +22,11 @@
     "open_in_tab": true,
     "page": "options/options.html"
   },
-  "permissions": ["bookmarks", "storage", "tabs", "windows"],
-  "version": "1.0"
+  "permissions": [
+    "bookmarks",
+    "storage",
+    "tabs",
+    "windows"
+  ],
+  "version": "0.0.1"
 }
