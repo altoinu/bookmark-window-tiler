@@ -9,7 +9,7 @@
 
 ## 🖥️ Multi-Monitor & Coordinate Intelligence
 
-- [ ] **Display Topology Awareness:** Integrate runtime screen environment checks (`window.screen` or extension display APIs) to validate input bounds against the user's active monitor setup.
+- [x] **Display Topology Awareness:** Implemented a Virtual Monitor Calibration engine allowing users to define physical display offsets and route specific bookmark windows to secondary screens, circumventing Firefox's lack of native hardware topology APIs.
 - [ ] **Layout Snapping Previews:** Create a visual layout wireframe overlay in the options panel to show users where their windows will launch before saving.
 - [x] **Relative/Percentage Grid Splitting:** Supported percentage-based fractional grid mappings (e.g., `50%`, `33%`) resolved dynamically at runtime against operating system display bounds (`availWidth`/`availHeight`).
 
