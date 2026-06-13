@@ -91,6 +91,13 @@ If you prefer testing functionality outside of the automated VS Code launcher en
 2. Follow steps 4–6 in the standard **Installation** guide above to mount the temporary asset inside `about:debugging`.
 3. Click the **Inspect** button adjacent to the extension descriptor within `about:debugging` to reveal the standalone Firefox Add-on Toolbox window to trace local storage entries and debug script executions.
 
+## ⚠️ Known Issues
+
+- **macOS Window Padding (100% Dimensions):** Due to strict window management protocols in the macOS Window Server, requesting a precise `100%` Width and `100%` Height layout will result in a small visible gap (padding) around the four edges of the browser window. This is an OS-level mechanism designed to prevent drop-shadow clipping.
+  - _Workaround:_ If you require a flush layout without the gap on macOS, configure your layout dimensions to `99%` Width and `100%` Height (or vice versa). This slightly offsets the strict mathematical screen bounds, allowing the OS to snap the window flush against the available edges.
+- **Server-Side URL Redirects (Tab Snapping Failure):** The extension uses exact string matching (excluding trailing slashes, hashes, and query parameters) to locate open tabs. If a bookmarked URL redirects upon loading (e.g., `mozilla.org/about/` redirects to `mozilla.org/en-US/about/`), the extension will fail to recognize the open tab and will spawn a redundant window instead.
+  - _Workaround:_ Ensure your saved bookmarks reflect the final, fully resolved URL after any server-side redirects or language code injections.
+
 ## Scripts Command Index
 
 - `npm run build` - Transpiles the extension package and stages production assets inside `dist/`.

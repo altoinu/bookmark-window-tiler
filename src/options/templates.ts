@@ -24,12 +24,12 @@ const renderField = (prefix: string, index: number, val: number, unit: string, l
 `;
 
 export const generateUrlConfigHtml = (title: string, url: string, index: number, displays: VirtualDisplay[], layout?: WindowLayout): string => {
-  const displayId = layout?.displayId || '';
   const enabled = layout ? layout.enabled : true;
-  const hParsed = parseLayoutValue(layout?.height, 600);
-  const wParsed = parseLayoutValue(layout?.width, 800);
+  const displayId = layout?.displayId || '';
   const xParsed = parseLayoutValue(layout?.x, 0);
   const yParsed = parseLayoutValue(layout?.y, 0);
+  const wParsed = parseLayoutValue(layout?.width, 800);
+  const hParsed = parseLayoutValue(layout?.height, 600);
 
   const displayOptions = displays
     .map((d) => {
