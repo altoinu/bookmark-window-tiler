@@ -1,6 +1,5 @@
-import { WorkspaceProfile } from '../types/index.js';
+import { VirtualDisplay, WorkspaceProfile } from '../types/index.js';
 import { generateUrlConfigHtml } from './templates.js';
-import 'webextension-polyfill';
 
 // Extend the native bookmark type to include our custom depth property
 export interface FolderNode extends browser.bookmarks.BookmarkTreeNode {
@@ -12,6 +11,7 @@ let allFolders: FolderNode[] = [];
 let currentFolderId: string = '';
 let currentProfileId: string = 'new';
 let currentProfilesList: WorkspaceProfile[] = [];
+let globalVirtualDisplays: VirtualDisplay[] = [];
 let isUpdatingDropdown: boolean = false;
 
 const deleteProfile = async (): Promise<void> => {
@@ -61,6 +61,70 @@ const extractFolders = (nodes: browser.bookmarks.BookmarkTreeNode[], depth: numb
   }
 
   return folders;
+};
+
+const handleAddDisplay = async (): Promise<void> => {
+  const name = (document.getElementById('disp-name') as HTMLInputElement).value.trim();
+  const x = parseInt((document.getElementById('disp-x') as HTMLInputElement).value, 10);
+  const y = parseInt((document.getElementById('disp-y') as HTMLInputElement).value, 10);
+  const w = parseInt((document.getElementById('disp-w') as HTMLInputElement).value, 10);
+  const h = parseInt((document.getElementById('disp-h') as HTMLInputElement).value, 10);
+
+  if (!name || isNaN(x) || isNaN(y) || isNaN(w) || isNaN(h)) {
+    alert('Please fill out all hardware display fields with valid numbers.');
+    return;
+  }
+
+  globalVirtualDisplays.push({
+    height: h,
+    id: `disp_${Date.now()}`,
+    name,
+    offsetX: x,
+    offsetY: y,
+    width: w,
+  });
+
+  await browser.storage.local.set({ global_displays: globalVirtualDisplays });
+  renderVirtualDisplays();
+  await renderLayoutGrid();
+
+  (document.getElementById('disp-name') as HTMLInputElement).value = '';
+};
+
+const handleFolderSelection = async (event: Event): Promise<void> => {
+  if (isUpdatingDropdown || !event.isTrusted) return; // Guard against programmatic option resets during re-renders
+  const selectEl = event.target as HTMLSelectElement;
+  currentFolderId = selectEl.value;
+  currentProfileId = 'new'; // Reset to default when swapping workspace targets
+
+  const container = document.getElementById('url-config-container');
+  const deleteBtn = document.getElementById('delete-btn') as HTMLButtonElement;
+  const saveBtn = document.getElementById('save-btn');
+
+  if (!container || !deleteBtn || !saveBtn) return;
+
+  if (!currentFolderId) {
+    container.innerHTML = '';
+    deleteBtn.style.display = 'none';
+    saveBtn.style.display = 'none';
+    await syncProfilesDropdown();
+    return;
+  }
+
+  await syncProfilesDropdown();
+  await renderLayoutGrid();
+};
+
+const handleProfileSelection = async (event: Event): Promise<void> => {
+  if (isUpdatingDropdown || !event.isTrusted) return; // Guard against programmatic option resets during re-renders
+  const selectEl = event.target as HTMLSelectElement;
+  currentProfileId = selectEl.value;
+  await renderLayoutGrid();
+};
+
+const handleSortChange = (event: Event): void => {
+  const radio = event.target as HTMLInputElement;
+  renderDropdown(radio.value as 'alphabetical' | 'original');
 };
 
 // Render the folder select dropdown based on the chosen sort mode
@@ -133,7 +197,7 @@ const renderLayoutGrid = async (): Promise<void> => {
         const title = link.title || link.url;
         // Extract saved configuration layout if it exists for this URL
         const savedLayout = activeProfile?.urlConfigs[link.url];
-        html += generateUrlConfigHtml(title, link.url, index, savedLayout);
+        html += generateUrlConfigHtml(title, link.url, index, globalVirtualDisplays, savedLayout);
       }
     });
 
@@ -155,6 +219,121 @@ const renderLayoutGrid = async (): Promise<void> => {
   } catch (error) {
     console.error('Error rendering grid layout:', error);
     container.innerHTML = '<p style="color: red;">Error processing folder components.</p>';
+  }
+};
+
+const renderVirtualDisplays = (): void => {
+  const list = document.getElementById('display-list');
+  if (!list) return;
+
+  list.innerHTML = globalVirtualDisplays
+    .map(
+      (d) => `
+      <li style="display: flex; justify-content: space-between; background: #fff; border: 1px solid #ddd; padding: 8px 12px; margin-bottom: 5px; border-radius: 4px;">
+        <span><strong>${d.name}</strong> &mdash; ${d.width}x${d.height} @ (X: ${d.offsetX}, Y: ${d.offsetY})</span>
+        <button data-id="${d.id}" class="del-disp-btn" style="background: none; border: none; color: #f44336; cursor: pointer; font-size: 16px; padding: 0;">✖</button>
+      </li>
+    `,
+    )
+    .join('');
+
+  document.querySelectorAll('.del-disp-btn').forEach((btn) => {
+    btn.addEventListener('click', async (e) => {
+      const id = (e.target as HTMLButtonElement).dataset.id;
+      globalVirtualDisplays = globalVirtualDisplays.filter((d) => d.id !== id);
+      await browser.storage.local.set({ global_displays: globalVirtualDisplays });
+      renderVirtualDisplays();
+      await renderLayoutGrid();
+    });
+  });
+};
+
+const saveProfile = async (): Promise<void> => {
+  if (!currentFolderId) return;
+
+  const profileNameInput = document.getElementById('profile-name') as HTMLInputElement;
+  const chosenName = profileNameInput?.value.trim();
+
+  if (!chosenName) {
+    alert('Please provide a profile name before saving.');
+    return;
+  }
+
+  // Check if a profile with the same name already exists for this folder to safely override it
+  const matchingProfileByName = currentProfilesList.find((p) => p.name.toLowerCase() === chosenName.toLowerCase());
+
+  // Preserve operational ID if overwriting an existing config, catch matching profile names, or establish a unique timestamp hash
+  const finalProfileId = currentProfileId !== 'new' ? currentProfileId : matchingProfileByName ? matchingProfileByName.id : `profile_${Date.now()}`;
+
+  const profile: WorkspaceProfile = {
+    bookmarkFolderId: currentFolderId,
+    id: finalProfileId,
+    name: chosenName,
+    urlConfigs: {},
+  };
+
+  const urlInputs = document.querySelectorAll('input[type="hidden"][id^="url-"]');
+
+  urlInputs.forEach((hiddenInput) => {
+    const url = (hiddenInput as HTMLInputElement).value;
+    const index = hiddenInput.id.split('-')[1];
+
+    const displayEl = document.getElementById(`display-${index}`) as HTMLSelectElement;
+    const enabledEl = document.getElementById(`enabled-${index}`) as HTMLInputElement;
+    const hEl = document.getElementById(`h-${index}`) as HTMLInputElement;
+    const hUnitEl = document.getElementById(`h-unit-${index}`) as HTMLSelectElement;
+    const wEl = document.getElementById(`w-${index}`) as HTMLInputElement;
+    const wUnitEl = document.getElementById(`w-unit-${index}`) as HTMLSelectElement;
+    const xEl = document.getElementById(`x-${index}`) as HTMLInputElement;
+    const xUnitEl = document.getElementById(`x-unit-${index}`) as HTMLSelectElement;
+    const yEl = document.getElementById(`y-${index}`) as HTMLInputElement;
+    const yUnitEl = document.getElementById(`y-unit-${index}`) as HTMLSelectElement;
+
+    if (url && enabledEl && hEl && hUnitEl && wEl && wUnitEl && xEl && xUnitEl && yEl && yUnitEl) {
+      const hVal = parseInt(hEl.value, 10) || 600;
+      const wVal = parseInt(wEl.value, 10) || 800;
+      const xVal = parseInt(xEl.value, 10) || 0;
+      const yVal = parseInt(yEl.value, 10) || 0;
+
+      profile.urlConfigs[url] = {
+        displayId: displayEl ? displayEl.value : '',
+        enabled: enabledEl.checked,
+        height: hUnitEl.value === '%' ? `${hVal}%` : hVal,
+        width: wUnitEl.value === '%' ? `${wVal}%` : wVal,
+        x: xUnitEl.value === '%' ? `${xVal}%` : xVal,
+        y: yUnitEl.value === '%' ? `${yVal}%` : yVal,
+      };
+    }
+  });
+
+  try {
+    // Unique identifier key ensuring multi-profile safety
+    const storageKey = `workspace_${finalProfileId}`;
+    await browser.storage.local.set({ [storageKey]: profile });
+
+    // Set the saved profile as active so the view doesn't jump or reset
+    currentProfileId = finalProfileId;
+
+    // Refresh configurations list and lock dropdown to active option
+    await syncProfilesDropdown();
+    await renderLayoutGrid();
+
+    const saveBtn = document.getElementById('save-btn') as HTMLButtonElement;
+    const originalText = saveBtn.textContent;
+    saveBtn.textContent = 'Saved!';
+    saveBtn.style.backgroundColor = '#4caf50';
+    saveBtn.style.color = 'white';
+
+    setTimeout(() => {
+      saveBtn.textContent = originalText;
+      saveBtn.style.backgroundColor = '';
+      saveBtn.style.color = '';
+    }, 2000);
+
+    console.log('Saved profile to storage:', profile);
+  } catch (error) {
+    console.error('Error saving profile layout:', error);
+    alert('Failed to save profile configuration.');
   }
 };
 
@@ -201,134 +380,22 @@ const syncProfilesDropdown = async (): Promise<void> => {
   isUpdatingDropdown = false;
 };
 
-const handleFolderSelection = async (event: Event): Promise<void> => {
-  if (isUpdatingDropdown || !event.isTrusted) return; // Guard against programmatic option resets during re-renders
-  const selectEl = event.target as HTMLSelectElement;
-  currentFolderId = selectEl.value;
-  currentProfileId = 'new'; // Reset to default when swapping workspace targets
-
-  const container = document.getElementById('url-config-container');
-  const deleteBtn = document.getElementById('delete-btn') as HTMLButtonElement;
-  const saveBtn = document.getElementById('save-btn');
-
-  if (!container || !deleteBtn || !saveBtn) return;
-
-  if (!currentFolderId) {
-    container.innerHTML = '';
-    deleteBtn.style.display = 'none';
-    saveBtn.style.display = 'none';
-    await syncProfilesDropdown();
-    return;
-  }
-
-  await syncProfilesDropdown();
-  await renderLayoutGrid();
-};
-
-const handleProfileSelection = async (event: Event): Promise<void> => {
-  if (isUpdatingDropdown || !event.isTrusted) return; // Guard against programmatic option resets during re-renders
-  const selectEl = event.target as HTMLSelectElement;
-  currentProfileId = selectEl.value;
-  await renderLayoutGrid();
-};
-
-const handleSortChange = (event: Event): void => {
-  const radio = event.target as HTMLInputElement;
-  renderDropdown(radio.value as 'alphabetical' | 'original');
-};
-
-const saveProfile = async (): Promise<void> => {
-  if (!currentFolderId) return;
-
-  const profileNameInput = document.getElementById('profile-name') as HTMLInputElement;
-  const chosenName = profileNameInput?.value.trim();
-
-  if (!chosenName) {
-    alert('Please provide a profile name before saving.');
-    return;
-  }
-
-  // Check if a profile with the same name already exists for this folder to safely override it
-  const matchingProfileByName = currentProfilesList.find((p) => p.name.toLowerCase() === chosenName.toLowerCase());
-
-  // Preserve operational ID if overwriting an existing config, catch matching profile names, or establish a unique timestamp hash
-  const finalProfileId = currentProfileId !== 'new' ? currentProfileId : matchingProfileByName ? matchingProfileByName.id : `profile_${Date.now()}`;
-
-  const profile: WorkspaceProfile = {
-    bookmarkFolderId: currentFolderId,
-    id: finalProfileId,
-    name: chosenName,
-    urlConfigs: {},
-  };
-
-  const urlInputs = document.querySelectorAll('input[type="hidden"][id^="url-"]');
-
-  urlInputs.forEach((hiddenInput) => {
-    const url = (hiddenInput as HTMLInputElement).value;
-    const index = hiddenInput.id.split('-')[1];
-
-    const enabledEl = document.getElementById(`enabled-${index}`) as HTMLInputElement;
-    const hEl = document.getElementById(`h-${index}`) as HTMLInputElement;
-    const hUnitEl = document.getElementById(`h-unit-${index}`) as HTMLSelectElement;
-    const wEl = document.getElementById(`w-${index}`) as HTMLInputElement;
-    const wUnitEl = document.getElementById(`w-unit-${index}`) as HTMLSelectElement;
-    const xEl = document.getElementById(`x-${index}`) as HTMLInputElement;
-    const xUnitEl = document.getElementById(`x-unit-${index}`) as HTMLSelectElement;
-    const yEl = document.getElementById(`y-${index}`) as HTMLInputElement;
-    const yUnitEl = document.getElementById(`y-unit-${index}`) as HTMLSelectElement;
-
-    if (url && enabledEl && hEl && hUnitEl && wEl && wUnitEl && xEl && xUnitEl && yEl && yUnitEl) {
-      const hVal = parseInt(hEl.value, 10) || 600;
-      const wVal = parseInt(wEl.value, 10) || 800;
-      const xVal = parseInt(xEl.value, 10) || 0;
-      const yVal = parseInt(yEl.value, 10) || 0;
-
-      profile.urlConfigs[url] = {
-        enabled: enabledEl.checked,
-        height: hUnitEl.value === '%' ? `${hVal}%` : hVal,
-        width: wUnitEl.value === '%' ? `${wVal}%` : wVal,
-        x: xUnitEl.value === '%' ? `${xVal}%` : xVal,
-        y: yUnitEl.value === '%' ? `${yVal}%` : yVal,
-      };
-    }
-  });
-
-  try {
-    // Unique identifier key ensuring multi-profile safety
-    const storageKey = `workspace_${finalProfileId}`;
-    await browser.storage.local.set({ [storageKey]: profile });
-
-    // Set the saved profile as active so the view doesn't jump or reset
-    currentProfileId = finalProfileId;
-
-    // Refresh configurations list and lock dropdown to active option
-    await syncProfilesDropdown();
-    await renderLayoutGrid();
-
-    const saveBtn = document.getElementById('save-btn') as HTMLButtonElement;
-    const originalText = saveBtn.textContent;
-    saveBtn.textContent = 'Saved!';
-    saveBtn.style.backgroundColor = '#4caf50';
-    saveBtn.style.color = 'white';
-
-    setTimeout(() => {
-      saveBtn.textContent = originalText;
-      saveBtn.style.backgroundColor = '';
-      saveBtn.style.color = '';
-    }, 2000);
-
-    console.log('Saved profile to storage:', profile);
-  } catch (error) {
-    console.error('Error saving profile layout:', error);
-    alert('Failed to save profile configuration.');
-  }
-};
-
 const initializeOptions = async (): Promise<void> => {
   try {
     const tree = await browser.bookmarks.getTree();
     allFolders = extractFolders(tree);
+
+    // Initialize the Virtual Display configurations
+    const storage = await browser.storage.local.get('global_displays');
+    globalVirtualDisplays = (storage.global_displays as VirtualDisplay[]) || [];
+    renderVirtualDisplays();
+
     renderDropdown('original');
+
+    const addDispBtn = document.getElementById('add-display-btn');
+    if (addDispBtn) {
+      addDispBtn.addEventListener('click', handleAddDisplay);
+    }
 
     const deleteBtn = document.getElementById('delete-btn');
     if (deleteBtn) {
@@ -349,7 +416,7 @@ const initializeOptions = async (): Promise<void> => {
     const sortRadios = document.querySelectorAll('input[name="sort-order"]');
     sortRadios.forEach((radio) => radio.addEventListener('change', handleSortChange));
   } catch (error) {
-    console.error('Failed to load bookmarks configuration:', error);
+    console.error('Failed to load options configurations:', error);
   }
 };
 
