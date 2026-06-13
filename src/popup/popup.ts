@@ -101,6 +101,15 @@ const launchProfile = async (profile: WorkspaceProfile): Promise<void> => {
 };
 
 const initializePopup = async (): Promise<void> => {
+  // Wire up the options button directly to the WebExtensions API
+  const openOptionsBtn = document.getElementById('open-options');
+  if (openOptionsBtn) {
+    openOptionsBtn.addEventListener('click', () => {
+      browser.runtime.openOptionsPage();
+      window.close();
+    });
+  }
+
   const container = document.getElementById('profiles-container');
   if (!container) return;
 
@@ -117,7 +126,7 @@ const initializePopup = async (): Promise<void> => {
       container.innerHTML = `
         <div class="empty-state">
           No profiles found.<br><br>
-          Right-click this icon and select "Options" or "Preferences" to create one.
+          Click the ⚙️ settings icon above to create one.
         </div>
       `;
       return;
