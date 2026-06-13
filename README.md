@@ -23,6 +23,7 @@ bookmark-window-tiler/
 │   │   ├── options.ts      # Profile management & storage engine
 │   │   └── templates.ts    # Declarative component layout strings
 │   └── popup/
+│       ├── popup.css       # Popover stylesheet
 │       ├── popup.html      # Popover execution viewport
 │       └── popup.ts        # Tab extraction & window spawning matrix
 ├── eslint.config.mts       # Bifurcated code intelligence rules
@@ -55,6 +56,17 @@ bookmark-window-tiler/
 2. **Assign Folder Targets:** Select your workspace bookmark folder from the hierarchical drop-down menu.
 3. **Configure Dimensions:** Choose `-- Create New Profile --`, provide a unique layout title, change the individual pixel grids to match your desktop workspace targets, and hit **Save Profile**.
 4. **Deploy Workspaces:** Open the toolbar popover menu and tap your profile. Open windows will instantly conform, and closed windows will safely initialize.
+
+## 📦 Release & Auto-Update Pipeline
+
+This extension utilizes a self-hosted, unlisted distribution model. Firefox automatically checks the `updates.json` ledger hosted on the `main` branch of this repository to discover and install new, cryptographically signed releases.
+
+To publish a new auto-updating version:
+
+1. **Bump, Sync & Push:** Run `npm run release:patch` (or `:minor`, `:major`). This triggers a fully automated lifecycle that increments the package version, syncs `manifest.json` and `updates.json`, commits the changes, creates a git tag, and automatically pushes everything to GitHub via the `postversion` hook.
+2. **Package the Asset:** Run `npm run package`. This cleans previous builds and generates a pristine `.zip` file inside the `artifacts/` directory.
+3. **Sign via Mozilla:** Log in to the [Mozilla Add-on Developer Hub](https://addons.mozilla.org/en-US/developers/), upload the new `.zip` artifact to your unlisted extension profile, and wait for the automated review. Download the resulting signed `.xpi` file.
+4. **Distribute:** Create a GitHub Release for your new version tag and attach the signed `.xpi` file to it. Ensure the `.xpi` file name perfectly matches the download URL designated in your `updates.json` ledger.
 
 ## Development & Debugging Workflow
 
