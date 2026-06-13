@@ -17,6 +17,49 @@
     </div>
 
     <div id="app-container">
+      <details class="hardware-calibration" style="margin-bottom: 20px; border: 1px solid #ccc; padding: 15px; border-radius: 6px; background: #fafafa">
+        <summary style="font-weight: bold; cursor: pointer; color: #4a90e2; outline: none">🖥️ Hardware Display Calibration (Virtual Monitors)</summary>
+        <div style="margin-top: 15px">
+          <p style="font-size: 13px; margin-top: 0; color: #555">
+            Firefox does not natively report multi-monitor setups. Define your physical screens here to assign bookmarks to specific displays.
+            <i>(e.g., A 1920x1080 monitor placed directly to the left of your main screen has an X Offset of -1920).</i>
+          </p>
+
+          <div
+            class="display-form"
+            style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto; gap: 10px; align-items: end; margin-bottom: 15px; font-size: 13px"
+          >
+            <div>
+              <label style="display: block; margin-bottom: 4px; font-weight: 500">Monitor Name</label
+              ><input type="text" id="disp-name" placeholder="Left Monitor" style="width: 100%; box-sizing: border-box; padding: 6px" />
+            </div>
+            <div>
+              <label style="display: block; margin-bottom: 4px; font-weight: 500">X Offset</label
+              ><input type="number" id="disp-x" value="-1920" style="width: 100%; box-sizing: border-box; padding: 6px" />
+            </div>
+            <div>
+              <label style="display: block; margin-bottom: 4px; font-weight: 500">Y Offset</label
+              ><input type="number" id="disp-y" value="0" style="width: 100%; box-sizing: border-box; padding: 6px" />
+            </div>
+            <div>
+              <label style="display: block; margin-bottom: 4px; font-weight: 500">Width</label
+              ><input type="number" id="disp-w" value="1920" style="width: 100%; box-sizing: border-box; padding: 6px" />
+            </div>
+            <div>
+              <label style="display: block; margin-bottom: 4px; font-weight: 500">Height</label
+              ><input type="number" id="disp-h" value="1080" style="width: 100%; box-sizing: border-box; padding: 6px" />
+            </div>
+            <button
+              id="add-display-btn"
+              style="padding: 6px 12px; height: 31px; cursor: pointer; background: #4caf50; color: white; border: none; border-radius: 4px"
+            >
+              Add
+            </button>
+          </div>
+          <ul id="display-list" style="list-style: none; padding: 0; margin: 0; font-size: 13px"></ul>
+        </div>
+      </details>
+
       <div class="sort-group">
         <label><strong>Sort Folders By:</strong></label>
         <label class="radio-label"> <input type="radio" name="sort-order" value="original" checked /> Original Order </label>
@@ -57,6 +100,7 @@
       <button id="save-btn" style="display: none; padding: 10px 20px; font-size: 16px; cursor: pointer">Save Profile</button>
     </div>
 
+    <script src="../lib/browser-polyfill.min.js"></script>
     <script type="module" src="options.js"></script>
   </body>
 </html>

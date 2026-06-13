@@ -1,5 +1,4 @@
-import { WorkspaceProfile } from '../types/index.js';
-import 'webextension-polyfill';
+import { VirtualDisplay, WorkspaceProfile } from '../types/index.js';
 
 const resolveDimension = (value: string | number, maxAvailable: number): number => {
   if (typeof value === 'number') {
@@ -17,6 +16,8 @@ const launchProfile = async (profile: WorkspaceProfile): Promise<void> => {
 
   // Fetch all currently open tabs across all windows
   const allTabs = await browser.tabs.query({});
+  const storage = await browser.storage.local.get('global_displays');
+  const virtualDisplays = (storage.global_displays as VirtualDisplay[]) || [];
 
   // Helper function to remove trailing slashes, empty queries (?), or hashes (#)
   const cleanUrl = (u: string): string => u.replace(/[/?#]+$/, '');
@@ -30,11 +31,20 @@ const launchProfile = async (profile: WorkspaceProfile): Promise<void> => {
     // Only launch if the user left the checkbox enabled
     if (layout && layout.enabled) {
       try {
+        // Find the target monitor to apply layout constraints and physical bounds
+        const targetDisplay = virtualDisplays.find((d) => d.id === layout.displayId);
+
+        // Fallback to primary screen capabilities if no custom monitor is bound
+        const baseW = targetDisplay ? targetDisplay.width : window.screen.availWidth;
+        const baseH = targetDisplay ? targetDisplay.height : window.screen.availHeight;
+        const offsetX = targetDisplay ? targetDisplay.offsetX : 0;
+        const offsetY = targetDisplay ? targetDisplay.offsetY : 0;
+
         // Resolve dynamic percentage options or absolute pixel integers against current screen layout
-        const calculatedHeight = resolveDimension(layout.height, window.screen.availHeight);
-        const calculatedWidth = resolveDimension(layout.width, window.screen.availWidth);
-        const calculatedX = resolveDimension(layout.x, window.screen.availWidth);
-        const calculatedY = resolveDimension(layout.y, window.screen.availHeight);
+        const calculatedHeight = resolveDimension(layout.height, baseH);
+        const calculatedWidth = resolveDimension(layout.width, baseW);
+        const calculatedX = resolveDimension(layout.x, baseW) + offsetX;
+        const calculatedY = resolveDimension(layout.y, baseH) + offsetY;
 
         // Look for a cleaned-up match in our open tabs
         const existingTab = allTabs.find((tab) => tab.url && cleanUrl(tab.url) === cleanUrl(url));
