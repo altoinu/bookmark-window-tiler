@@ -35,16 +35,23 @@ const launchProfile = async (profile: WorkspaceProfile): Promise<void> => {
         const targetDisplay = virtualDisplays.find((d) => d.id === layout.displayId);
 
         // Fallback to primary screen capabilities if no custom monitor is bound
-        const baseW = targetDisplay ? targetDisplay.width : window.screen.availWidth;
-        const baseH = targetDisplay ? targetDisplay.height : window.screen.availHeight;
         const offsetX = targetDisplay ? targetDisplay.offsetX : 0;
         const offsetY = targetDisplay ? targetDisplay.offsetY : 0;
+        const baseW = targetDisplay ? targetDisplay.width : window.screen.availWidth;
+        const baseH = targetDisplay ? targetDisplay.height : window.screen.availHeight;
 
         // Resolve dynamic percentage options or absolute pixel integers against current screen layout
-        const calculatedHeight = resolveDimension(layout.height, baseH);
-        const calculatedWidth = resolveDimension(layout.width, baseW);
         const calculatedX = resolveDimension(layout.x, baseW) + offsetX;
         const calculatedY = resolveDimension(layout.y, baseH) + offsetY;
+        const calculatedWidth = resolveDimension(layout.width, baseW);
+        const calculatedHeight = resolveDimension(layout.height, baseH);
+
+        const windowParams = {
+          height: calculatedHeight,
+          left: calculatedX,
+          top: calculatedY,
+          width: calculatedWidth,
+        };
 
         // Look for a cleaned-up match in our open tabs
         const existingTab = allTabs.find((tab) => tab.url && cleanUrl(tab.url) === cleanUrl(url));
@@ -56,36 +63,18 @@ const launchProfile = async (profile: WorkspaceProfile): Promise<void> => {
           if (tabsInSharedWindow.length > 1) {
             console.log(`Extracting shared tab ${url} into its own layout window.`);
             // Extract the existing tab into a new window with the precise layout
-            await browser.windows.create({
-              height: calculatedHeight,
-              left: calculatedX,
-              tabId: existingTab.id,
-              top: calculatedY,
-              width: calculatedWidth,
-            });
+            await browser.windows.create({ ...windowParams, tabId: existingTab.id });
           } else {
             console.log(`Tab already open and standalone for ${url}, snapping to layout.`);
             // 1. Activate the tab within its window
             await browser.tabs.update(existingTab.id, { active: true });
 
             // 2. Apply the configured dimensions to the window without stealing popup focus
-            await browser.windows.update(existingTab.windowId, {
-              height: calculatedHeight,
-              left: calculatedX,
-              state: 'normal',
-              top: calculatedY,
-              width: calculatedWidth,
-            });
+            await browser.windows.update(existingTab.windowId, { ...windowParams, state: 'normal' });
           }
         } else {
           // Tab doesn't exist, spawn a fresh window
-          await browser.windows.create({
-            height: calculatedHeight,
-            left: calculatedX,
-            top: calculatedY,
-            url: url,
-            width: calculatedWidth,
-          });
+          await browser.windows.create({ ...windowParams, url: url });
         }
       } catch (error) {
         console.error(`Failed to launch or update window for ${url}:`, error);
